@@ -25,9 +25,19 @@ class EmployeeController extends Controller
             'pageTitle' => $pageTitle,
             'employees' => $employees
         ]);
+        //     $employees = DB::select('
+        select *, employees.id as employee_id, positions.name as position_name
+        from employees
+        left join positions on employees.position_id = positions.id
+    ');
+
+    return view('employee.index', [
+        'pageTitle' => $pageTitle,
+        'employees' => $employees
+     ]);
 
     }
-
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -37,6 +47,9 @@ class EmployeeController extends Controller
         $positions= Position::all();
 
         return view('employee.create', compact('pageTitle', 'positions'));
+        
+        // $positions = DB::select('select * from positions');
+         return view('employee.create', compact('pageTitle', 'positions'));
 
 
     }
@@ -70,7 +83,15 @@ class EmployeeController extends Controller
             $employee->position_id = $request->position;
             $employee->save();
                     
-        
+            // DB::table('employees')->insert([
+                'firstname' => $request->firstName,
+                'lastname' => $request->lastName,
+                'email' => $request->email,
+                'age' => $request->age,
+                'position_id' => $request->position,
+            ]);
+
+
             return redirect()->route('employees.index');
         
     }
@@ -83,6 +104,14 @@ class EmployeeController extends Controller
         $pageTitle = 'Employee Detail';
 
         $employee= Employee::find($id);
+
+        //     $employee = collect(DB::select('
+            select *, employees.id as employee_id, positions.name as position_name
+            from employees
+            left join positions on employees.position_id = positions.id
+            where employees.id = ?
+        ', [$id]))->first();
+
 
     return view('employee.show', compact('pageTitle', 'employee'));
 
@@ -142,6 +171,9 @@ class EmployeeController extends Controller
     {
         
     Employee::find($id)->delete();
+    //     DB::table('employees')
+        ->where('id', $id)
+        ->delete();
 
     return redirect()->route('employees.index');
 
